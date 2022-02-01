@@ -6,6 +6,10 @@ library(patchwork)
 library(frame)
 library(assertthat)
 library(extraDistr)
+library(purrr)
+
+
+# First load the additional plant_functions
 
 # Import species traits and settings
 interval <- 5
@@ -22,6 +26,7 @@ system.time(fireDat <- frameDynTab(dat=res, tr, upper = 100, interval = interval
                                    G.C_rat = 3, C.C_rat = 0.1, deltaL = 0.46, lat = -35, map = 1000, mat = 20))
 
 # STEP 3: Model flammability dynamics
+## REQUIRES FUNCTIONING JAVA CONNECTION ###
 system.time(dyn <- firePlant(dat=fireDat, db.path = "out.plant.db", reps = 10,
                              slope = 10, slopeSD = 5, slopeRange = 15, 
                              temp = 30, tempSD = 5, tempRange = 3,
