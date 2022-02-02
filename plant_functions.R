@@ -80,8 +80,8 @@ shape_forest <- function(dat, tr, age, lat = -35, map = 1000, mat = 20) {
 stratify_community <- function(dat, tr, age, lat = -35, map = 1000, mat = 20, sample = 0.5, transects = 10){
   
   # Randomly sample results
-  veg <- data.frame(matrix(ncol = 5, nrow = 0))
-  colnames(veg) <- c("Species", "height", "base", "he", "ht")
+  vegStrat <- data.frame(matrix(ncol = 5, nrow = 0))
+  colnames(vegStrat) <- c("Species", "height", "base", "he", "ht")
   crowns <- shape_forest(dat, tr, age, lat, map, mat)
   steps <- nrow(crowns)
   samples <- ceiling(steps * sample)
@@ -97,23 +97,23 @@ stratify_community <- function(dat, tr, age, lat = -35, map = 1000, mat = 20, sa
       select(species, height, base, he, ht)
     # Select the chosen number of samples
     samp <- samp[1:samples, ]
-    veg <- rbind(veg,samp)
+    vegStrat <- rbind(vegStrat,samp)
   }
   
   # Calculate strata from random sample data
-  veg$Point <- 1
-  veg$top <- veg$height
-  veg <- as.data.frame(veg)
-  strat <- frame::frameStratify(veg = veg, spName = "species") %>%
+  vegStrat$Point <- 1
+  vegStrat$top <- vegStrat$height
+  vegStrat <- as.data.frame(vegStrat)
+  vegStrat <- frame::frameStratify(veg = vegStrat, spName = "species") %>%
     group_by(Stratum, species) %>%
     summarise_if(is.numeric, mean)%>%
     select(Stratum, species, height)
   
   # Interpolate to the stratum division heights, then add these to original data
-  breaks <- nrow(strat)-1
+  breaks <- nrow(vegStrat)-1
   heights <- list()
   for (b in 1:breaks) {
-    heights[b]<-strat$height[b]
+    heights[b]<-vegStrat$height[b]
   }
   heights[breaks+1] <- max(crowns$height, na.rm = TRUE)
   heights <- as.numeric(heights)
@@ -128,8 +128,8 @@ stratify_community <- function(dat, tr, age, lat = -35, map = 1000, mat = 20, sa
   # Measure density
   out <- f[0,]
   outA <- f[0,]
-  for (sp in unique(strat$species)) {
-    s <- filter(strat, species == sp)
+  for (sp in unique(vegStrat$species)) {
+    s <- filter(vegStrat, species == sp)
     outA <- filter(f, species == sp)
     s$height[nrow(s)] <- 1000
     # Identify the stratum of each plant
